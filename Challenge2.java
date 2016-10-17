@@ -6,8 +6,8 @@ public class Challenge2 extends Applet
 {
 	double x, y;
 	double velX, velY;
-	double gravity = 0.02;
-	double mGrav = 500.0;
+	double gravity = 0.003;
+	double mGrav = 75.0;
 	int height, width;
 	boolean mButton1 = false;
 	boolean mButton2 = false;
@@ -17,7 +17,7 @@ public class Challenge2 extends Applet
 	updateThread myThread;
 	boolean running = true;
 	double elastic = 0.5;
-	double friction = 0.9;
+	double friction = 0.995;
 	long lastFail;
 	long score;
 	long highScore;
@@ -102,8 +102,15 @@ public class Challenge2 extends Applet
 			}
 		}
 		
-		velX += accelX;
-		velY += accelY;
+		long prevTime = latestTime;
+		latestTime = System.currentTimeMillis();
+		int interval = (int)(latestTime - prevTime);
+		
+		double uX = velX;
+		double uY = velY;
+		
+		velX += accelX * interval;
+		velY += accelY * interval;
 		
 		if((x - radius <= 0 && velX < 0) || (x + radius >= width && velX > 0)) {
 			velX *= -1.0 * elastic;
@@ -113,21 +120,22 @@ public class Challenge2 extends Applet
 		
 		if((y - radius <= 0 && velY < 0) || (y + radius >= height && velY > 0)) {
 			velY *= -1.0 * elastic;
-			velX *= friction;
+			velX *= Math.pow(friction, interval);
 			lastFail = System.currentTimeMillis();
 		}
 		
-		long prevTime = latestTime;
-		latestTime = System.currentTimeMillis();
-		int interval = (int)(latestTime - prevTime);
-		x += velX * interval;
-		y += velY * interval;
+		
+	//	x += velX * interval;
+	//	y += velY * interval;
+	
+		x += 0.5 * (uX + velX) * interval;
+		y += 0.5 * (uY + velY) * interval;
 		
 		score = System.currentTimeMillis() - lastFail;
 		if(score > highScore && lastFail != 0)
 			highScore = score;
 		
 		repaint();
-		Thread.sleep(10);
+		Thread.sleep(0);
 	}
 }
